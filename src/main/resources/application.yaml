@@ -1,0 +1,27 @@
+management:
+  tracing:
+    sampling:
+      probability: 0.0
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, loggers
+      base-path: /
+      path-mapping:
+        health: actuator/health
+        metrics: actuator/metrics
+        loggers: oc-technology/actuator/loggers
+  endpoint:
+    health:
+      probes:
+        enabled: false
+      show-details: "always"
+  health:
+    diskspace:
+      enabled: false
+    r2dbc:
+      enabled: true
+    ping:
+      enabled: false
+    refresh:
+      enabled: false

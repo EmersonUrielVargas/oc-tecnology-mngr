@@ -1,6 +1,5 @@
-package com.onclass.tecnology;
+package com.onclass.technology;
 
-import com.onclass.technology.TecnologyApplication;
 import com.onclass.technology.domain.spi.TechnologyPersistencePort;
 import com.onclass.technology.domain.usecase.TechnologyUseCase;
 import org.junit.jupiter.api.Test;

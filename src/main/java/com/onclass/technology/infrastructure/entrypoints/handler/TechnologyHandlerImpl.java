@@ -4,11 +4,12 @@ import com.onclass.technology.domain.api.TechnologyServicePort;
 import com.onclass.technology.domain.enums.TechnicalMessage;
 import com.onclass.technology.domain.exceptions.BusinessException;
 import com.onclass.technology.domain.exceptions.TechnicalException;
+import com.onclass.technology.infrastructure.entrypoints.dto.request.AssignTechnologiesDTO;
 import com.onclass.technology.infrastructure.entrypoints.dto.request.CreateTechnologyDTO;
-import com.onclass.technology.infrastructure.entrypoints.dto.response.TechnologyDTO;
 import com.onclass.technology.infrastructure.entrypoints.mapper.TechnologyMapper;
 import com.onclass.technology.infrastructure.entrypoints.util.Constants;
 import com.onclass.technology.infrastructure.entrypoints.util.ErrorDTO;
+import com.onclass.technology.infrastructure.entrypoints.util.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ public class TechnologyHandlerImpl {
                 )
                 .flatMap(savedTechnology -> ServerResponse
                         .status(HttpStatus.CREATED)
-                        .bodyValue(TechnicalMessage.TECHNOLOGY_CREATED.getMessage()))
+                        .bodyValue(new ResponseDTO(TechnicalMessage.TECHNOLOGY_CREATED.getMessage())))
                 .doOnError(ex -> log.error(Constants.TECHNOLOGY_ERROR, ex))
                 .onErrorResume(BusinessException.class, ex -> buildErrorResponse(
                         HttpStatus.CONFLICT,
@@ -48,6 +49,29 @@ public class TechnologyHandlerImpl {
                 });
     }
 
+    public Mono<ServerResponse> assignTechnologies(ServerRequest request) {
+        return request.bodyToMono(AssignTechnologiesDTO.class)
+                .flatMap(assignTechnologiesDTO ->
+                    technologyServicePort.assignTechnologies(assignTechnologiesDTO.getCapacityID(), assignTechnologiesDTO.getTechnologiesIds())
+                        .doOnSuccess(successful -> log.info(Constants.ASSIGN_TECHNOLOGIES_CREATED_RS_OK))
+                )
+                .then(ServerResponse
+                    .status(HttpStatus.OK)
+                    .bodyValue(new ResponseDTO(TechnicalMessage.TECHNOLOGIES_ASSIGN_OK.getMessage())))
+                .doOnError(ex -> log.error(Constants.TECHNOLOGY_ERROR, ex))
+                .onErrorResume(BusinessException.class, ex -> buildErrorResponse(
+                        HttpStatus.CONFLICT,
+                        ex.getTechnicalMessage()))
+                .onErrorResume(TechnicalException.class, ex -> buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ex.getTechnicalMessage()))
+                .onErrorResume(ex -> {
+                    log.error(Constants.UNEXPECTED_ERROR, ex);
+                    return buildErrorResponse(
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                            TechnicalMessage.INTERNAL_ERROR);
+                });
+    }
     private Mono<ServerResponse> buildErrorResponse(HttpStatus httpStatus, TechnicalMessage error) {
         return Mono.defer(() -> {
             ErrorDTO errorResponse = ErrorDTO.builder()

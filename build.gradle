@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.5'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco'
 }
 
 group = 'com.onclass.tecnology'
@@ -24,6 +25,10 @@ ext {
 	set('resilience4jVersion', "2.3.0")
 }
 
+jacoco {
+	toolVersion = "0.8.11"
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
@@ -31,13 +36,18 @@ dependencies {
 	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 	implementation 'org.postgresql:r2dbc-postgresql'
-	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
 	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.4.0'
+	testImplementation "org.mapstruct:mapstruct:${mapstructVersion}"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 }
@@ -50,4 +60,18 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+
+	filter {
+        includeTestsMatching "com.onclass.technology.domain.usecase.*"
+        includeTestsMatching "com.onclass.technology.infrastructure.entrypoints.handler.*"
+
+        jacocoTestReport {
+            dependsOn test
+            reports {
+                xml.required = true
+                html.required = true
+                csv.required = false
+            }
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.onclass.technology.domain.usecase;
 
 import com.onclass.technology.domain.api.TechnologyServicePort;
+import com.onclass.technology.domain.enums.OrderList;
 import com.onclass.technology.domain.enums.TechnicalMessage;
 import com.onclass.technology.domain.exceptions.EntityAlreadyExistException;
 import com.onclass.technology.domain.exceptions.EntityNotFoundException;
@@ -9,6 +10,7 @@ import com.onclass.technology.domain.exceptions.TechnicalException;
 import com.onclass.technology.domain.model.Technology;
 import com.onclass.technology.domain.model.spi.CapacityItem;
 import com.onclass.technology.domain.spi.TechnologyPersistencePort;
+import com.onclass.technology.domain.utilities.CustomPage;
 import com.onclass.technology.domain.validators.Validator;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -55,5 +57,15 @@ public class TechnologyUseCase implements TechnologyServicePort {
     @Override
     public Flux<CapacityItem> findTechnologiesByCapabilitiesIds(List<Long> capabilitiesIds) {
         return technologyPersistencePort.findTechnologiesByCapabilitiesIds(capabilitiesIds);
+    }
+
+    @Override
+    public Mono<CustomPage<CapacityItem>> findPaginatedCapabilitiesByTechnologies(OrderList order, int page, int size) {
+        return technologyPersistencePort.findPaginatedCapabilitiesByTechnologiesNumber(order, page, size)
+            .collectList()
+            .zipWith(technologyPersistencePort.countTotalCapacities())
+            .map(tuple ->
+                CustomPage.buildCustomPage(tuple.getT1(), page, size, tuple.getT2())
+            );
     }
 }

@@ -11,7 +11,8 @@ public class Constants {
 
     public static final String PATH_POST_TECHNOLOGY = "/technology";
     public static final String PATH_POST_ASSIGN_TECHNOLOGIES = "/technology/assign";
-    public static final String PATH_GET_TECHNOLOGIES_BY_CAPABILITIES_IDS = "/technology/capabilities";
+    public static final String PATH_GET_TECHNOLOGIES_BY_CAPABILITIES_IDS = "/technology/capabilities_ids";
+    public static final String PATH_GET_CAPABILITIES_SORT_BY_TECHNOLOGIES = "/technology/capabilities";
 
     public final String QUERY_PARAM_CAPABILITIES_IDS = "capabilitiesIds";
     public final String QUERY_PARAM_ORDER_SORT = "sort";

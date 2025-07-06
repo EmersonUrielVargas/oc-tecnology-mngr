@@ -1,11 +1,13 @@
 package com.onclass.technology.infrastructure.adapters.persistenceadapter;
 
+import com.onclass.technology.domain.enums.OrderList;
 import com.onclass.technology.domain.model.Technology;
 import com.onclass.technology.domain.model.spi.CapacityItem;
 import com.onclass.technology.domain.model.spi.TechnologyItem;
 import com.onclass.technology.domain.spi.TechnologyPersistencePort;
 import com.onclass.technology.infrastructure.adapters.persistenceadapter.entity.TechnologyCapacityEntity;
 import com.onclass.technology.infrastructure.adapters.persistenceadapter.mapper.TechnologyEntityMapper;
+import com.onclass.technology.infrastructure.adapters.persistenceadapter.projection.TechnologiesCount;
 import com.onclass.technology.infrastructure.adapters.persistenceadapter.projection.TechnologyDetails;
 import com.onclass.technology.infrastructure.adapters.persistenceadapter.repository.TechnologyCapacityRepository;
 import com.onclass.technology.infrastructure.adapters.persistenceadapter.repository.TechnologyRepository;
@@ -68,4 +70,28 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
                 .map( technologies -> new CapacityItem(techGroup.key(), technologies))
             );
     }
+
+    @Override
+    public Flux<CapacityItem> findPaginatedCapabilitiesByTechnologiesNumber(OrderList order, int page, int size) {
+        return sortTechnologiesCountPaginated(order, page, size)
+            .doOnNext(list -> log.info("lista que llega {}", list))
+            .map(TechnologiesCount::getIdCapacity)
+            .collectList()
+            .flatMapMany(this::findTechnologiesByCapabilitiesIds);
+    }
+
+    @Override
+    public Mono<Long> countTotalCapacities() {
+        return technologyCapacityRepository.countCapabilities();
+    }
+
+    private Flux<TechnologiesCount> sortTechnologiesCountPaginated(OrderList order, int page, int size) {
+        int offset = page*size;
+        return switch (order){
+            case ASCENDANT -> technologyCapacityRepository.findCapabilitiesIdsOrderByTechnologiesCountAsc(size, offset);
+            case DESCENDANT -> technologyCapacityRepository.findCapabilitiesIdsOrderByTechnologiesCountDesc(size, offset);
+        };
+    }
+
+
 }

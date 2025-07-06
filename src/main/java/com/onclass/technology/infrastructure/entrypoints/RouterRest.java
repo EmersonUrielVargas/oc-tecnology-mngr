@@ -87,6 +87,7 @@ public class RouterRest {
     public RouterFunction<ServerResponse> routerFunction(TechnologyHandlerImpl technologyHandler) {
         return route(POST(PATH_POST_TECHNOLOGY), technologyHandler::createTechnology)
             .andRoute(POST(PATH_POST_ASSIGN_TECHNOLOGIES), technologyHandler::assignTechnologies)
-            .andRoute(GET(PATH_GET_TECHNOLOGIES_BY_CAPABILITIES_IDS),technologyHandler::getTechnologiesByCapabilities);
+            .andRoute(GET(PATH_GET_TECHNOLOGIES_BY_CAPABILITIES_IDS),technologyHandler::getTechnologiesByCapabilities)
+            .andRoute(GET(PATH_GET_CAPABILITIES_SORT_BY_TECHNOLOGIES),technologyHandler::getCapabilitiesSortByTechnologies);
     }
 }

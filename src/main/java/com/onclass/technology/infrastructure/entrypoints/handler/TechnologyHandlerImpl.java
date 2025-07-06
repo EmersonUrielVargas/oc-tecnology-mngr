@@ -1,6 +1,7 @@
 package com.onclass.technology.infrastructure.entrypoints.handler;
 
 import com.onclass.technology.domain.api.TechnologyServicePort;
+import com.onclass.technology.domain.enums.OrderList;
 import com.onclass.technology.domain.enums.TechnicalMessage;
 import com.onclass.technology.domain.exceptions.BusinessException;
 import com.onclass.technology.domain.exceptions.TechnicalException;
@@ -103,6 +104,33 @@ public class TechnologyHandlerImpl {
                         TechnicalMessage.INTERNAL_ERROR);
             });
     }
+
+    public Mono<ServerResponse> getCapabilitiesSortByTechnologies(ServerRequest request) {
+        String order = request.queryParam(Constants.QUERY_PARAM_ORDER_SORT).orElse(OrderList.ASCENDANT.getMessage());
+        int page = Integer.parseInt(request.queryParam(Constants.QUERY_PARAM_PAGE).orElse(Constants.DEFAULT_PAGE_PAGINATION));
+        int size = Integer.parseInt(request.queryParam(Constants.QUERY_PARAM_SIZE).orElse(Constants.DEFAULT_SIZE_PAGINATION));
+
+        return technologyServicePort.findPaginatedCapabilitiesByTechnologies(OrderList.fromString(order), page, size)
+            .doOnSuccess( pageCapabilities -> log.info(Constants.ASSIGN_TECHNOLOGIES_CREATED_RS_OK))
+            .flatMap(pageCapabilities ->
+                ServerResponse
+                .status(HttpStatus.OK)
+                .bodyValue(pageCapabilities))
+            .doOnError(ex -> log.error(Constants.TECHNOLOGY_ERROR, ex))
+            .onErrorResume(BusinessException.class, ex -> buildErrorResponse(
+                    HttpStatus.CONFLICT,
+                    ex.getTechnicalMessage()))
+            .onErrorResume(TechnicalException.class, ex -> buildErrorResponse(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ex.getTechnicalMessage()))
+            .onErrorResume(ex -> {
+                log.error(Constants.UNEXPECTED_ERROR, ex);
+                return buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        TechnicalMessage.INTERNAL_ERROR);
+            });
+    }
+
     private Mono<ServerResponse> buildErrorResponse(HttpStatus httpStatus, TechnicalMessage error) {
         return Mono.defer(() -> {
             ErrorDTO errorResponse = ErrorDTO.builder()

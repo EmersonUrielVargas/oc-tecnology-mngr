@@ -7,6 +7,7 @@ import com.onclass.technology.domain.exceptions.EntityNotFoundException;
 import com.onclass.technology.domain.exceptions.ParamRequiredMissingException;
 import com.onclass.technology.domain.exceptions.TechnicalException;
 import com.onclass.technology.domain.model.Technology;
+import com.onclass.technology.domain.model.spi.CapacityItem;
 import com.onclass.technology.domain.spi.TechnologyPersistencePort;
 import com.onclass.technology.domain.validators.Validator;
 import lombok.AllArgsConstructor;
@@ -49,5 +50,10 @@ public class TechnologyUseCase implements TechnologyServicePort {
                 }
                 return technologyPersistencePort.assignTechnologies(capabilityId, listTechnologies);
             });
+    }
+
+    @Override
+    public Flux<CapacityItem> findTechnologiesByCapabilitiesIds(List<Long> capabilitiesIds) {
+        return technologyPersistencePort.findTechnologiesByCapabilitiesIds(capabilitiesIds);
     }
 }

@@ -4,6 +4,7 @@ import com.onclass.technology.domain.api.TechnologyServicePort;
 import com.onclass.technology.domain.enums.TechnicalMessage;
 import com.onclass.technology.domain.exceptions.BusinessException;
 import com.onclass.technology.domain.exceptions.TechnicalException;
+import com.onclass.technology.domain.model.spi.CapacityItem;
 import com.onclass.technology.infrastructure.entrypoints.dto.request.AssignTechnologiesDTO;
 import com.onclass.technology.infrastructure.entrypoints.dto.request.CreateTechnologyDTO;
 import com.onclass.technology.infrastructure.entrypoints.mapper.TechnologyMapper;
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -71,6 +75,33 @@ public class TechnologyHandlerImpl {
                             HttpStatus.INTERNAL_SERVER_ERROR,
                             TechnicalMessage.INTERNAL_ERROR);
                 });
+    }
+
+    public Mono<ServerResponse> getTechnologiesByCapabilities(ServerRequest request) {
+        String capabilitiesParam = request.queryParam(Constants.QUERY_PARAM_CAPABILITIES_IDS).orElse("");
+        List<Long> capabilitiesIds = Arrays.stream(capabilitiesParam.split(","))
+            .map(Long::parseLong)
+            .toList();
+        return technologyServicePort.findTechnologiesByCapabilitiesIds(capabilitiesIds)
+            .collectList()
+            .doOnSuccess( capabilitiesList -> log.info(Constants.ASSIGN_TECHNOLOGIES_CREATED_RS_OK))
+            .flatMap(list ->
+                ServerResponse
+                .status(HttpStatus.OK)
+                .bodyValue(list))
+            .doOnError(ex -> log.error(Constants.TECHNOLOGY_ERROR, ex))
+            .onErrorResume(BusinessException.class, ex -> buildErrorResponse(
+                    HttpStatus.CONFLICT,
+                    ex.getTechnicalMessage()))
+            .onErrorResume(TechnicalException.class, ex -> buildErrorResponse(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    ex.getTechnicalMessage()))
+            .onErrorResume(ex -> {
+                log.error(Constants.UNEXPECTED_ERROR, ex);
+                return buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        TechnicalMessage.INTERNAL_ERROR);
+            });
     }
     private Mono<ServerResponse> buildErrorResponse(HttpStatus httpStatus, TechnicalMessage error) {
         return Mono.defer(() -> {

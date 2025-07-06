@@ -1,6 +1,7 @@
 package com.onclass.technology.domain.spi;
 
 import com.onclass.technology.domain.model.Technology;
+import com.onclass.technology.domain.model.spi.CapacityItem;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,4 +13,5 @@ public interface TechnologyPersistencePort {
     Mono<Void> assignTechnologies(Long capabilityId, List<Long> technologyIds);
     Flux<Technology> findByIds(List<Long> technologyIds);
     Mono<Technology> findById(Long technologyId);
+    Flux<CapacityItem> findTechnologiesByCapabilitiesIds(List<Long> capabilitiesIds);
 }

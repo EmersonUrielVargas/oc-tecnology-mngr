@@ -1,4 +1,4 @@
 package com.onclass.technology.domain.model;
 
-public record TechnologyCapacity(Long id, String name, String description ) {
+public record TechnologyCapacity(Long id, Long capacityId, Long technologyId ) {
 }

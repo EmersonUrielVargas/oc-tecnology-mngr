@@ -10,6 +10,7 @@ import com.onclass.technology.infrastructure.adapters.persistenceadapter.reposit
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.reactive.TransactionalOperator;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,7 +25,9 @@ public class UseCasesConfig {
         }
 
         @Bean
-        public TechnologyServicePort technologyServicePort(TechnologyPersistencePort technologyPersistencePort){
-                return new TechnologyUseCase(technologyPersistencePort);
+        public TechnologyServicePort technologyServicePort(
+            TechnologyPersistencePort technologyPersistencePort,
+            TransactionalOperator transactionalOperator){
+                return new TechnologyUseCase(technologyPersistencePort, transactionalOperator);
         }
 }

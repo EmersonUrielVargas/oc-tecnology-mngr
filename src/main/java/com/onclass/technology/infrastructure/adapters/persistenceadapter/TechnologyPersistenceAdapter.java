@@ -85,6 +85,21 @@ public class TechnologyPersistenceAdapter implements TechnologyPersistencePort {
         return technologyCapacityRepository.countCapabilities();
     }
 
+    @Override
+    public Mono<Void> deleteAllTechnologies(List<Long> technologiesIds) {
+        return technologyRepository.deleteAllById(technologiesIds);
+    }
+
+    @Override
+    public Mono<Void> deleteAllAssignations(List<Long> capabilitiesIds) {
+        return technologyCapacityRepository.deleteAllByCapabilitiesIds(capabilitiesIds);
+    }
+
+    @Override
+    public Mono<Boolean> verifyOtherAssignations(Long technologyId, List<Long> capabilitiesIds) {
+        return technologyCapacityRepository.verifyOtherAssignations(technologyId, capabilitiesIds);
+    }
+
     private Flux<TechnologiesCount> sortTechnologiesCountPaginated(OrderList order, int page, int size) {
         int offset = page*size;
         return switch (order){

@@ -14,4 +14,5 @@ public interface TechnologyServicePort {
     Mono<Void> assignTechnologies(Long capabilityId, List<Long> technologiesIds);
     Flux<CapacityItem> findTechnologiesByCapabilitiesIds(List<Long> capabilitiesIds);
     Mono<CustomPage<CapacityItem>> findPaginatedCapabilitiesByTechnologies(OrderList order, int page, int size);
+    Mono<Void> deleteTechnologiesByCapabilitiesIds(List<Long> capabilitiesIds);
 }

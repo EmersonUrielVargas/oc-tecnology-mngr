@@ -3,7 +3,6 @@ package com.onclass.technology.domain.spi;
 import com.onclass.technology.domain.enums.OrderList;
 import com.onclass.technology.domain.model.Technology;
 import com.onclass.technology.domain.model.spi.CapacityItem;
-import com.onclass.technology.domain.utilities.CustomPage;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,4 +17,7 @@ public interface TechnologyPersistencePort {
     Flux<CapacityItem> findTechnologiesByCapabilitiesIds(List<Long> capabilitiesIds);
     Flux<CapacityItem> findPaginatedCapabilitiesByTechnologiesNumber(OrderList order, int page, int size);
     Mono<Long> countTotalCapacities();
+    Mono<Void> deleteAllTechnologies(List<Long> technologiesIds);
+    Mono<Void> deleteAllAssignations(List<Long> capabilitiesIds);
+    Mono<Boolean> verifyOtherAssignations(Long technologyId, List<Long> capabilitiesIds);
 }

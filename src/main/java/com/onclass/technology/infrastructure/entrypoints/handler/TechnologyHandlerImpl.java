@@ -8,6 +8,7 @@ import com.onclass.technology.domain.exceptions.TechnicalException;
 import com.onclass.technology.domain.model.spi.CapacityItem;
 import com.onclass.technology.infrastructure.entrypoints.dto.request.AssignTechnologiesDTO;
 import com.onclass.technology.infrastructure.entrypoints.dto.request.CreateTechnologyDTO;
+import com.onclass.technology.infrastructure.entrypoints.dto.request.DeleteTechnologiesByCapabilitiesDTO;
 import com.onclass.technology.infrastructure.entrypoints.mapper.TechnologyMapper;
 import com.onclass.technology.infrastructure.entrypoints.util.Constants;
 import com.onclass.technology.infrastructure.entrypoints.util.ErrorDTO;
@@ -109,7 +110,6 @@ public class TechnologyHandlerImpl {
         String order = request.queryParam(Constants.QUERY_PARAM_ORDER_SORT).orElse(OrderList.ASCENDANT.getMessage());
         int page = Integer.parseInt(request.queryParam(Constants.QUERY_PARAM_PAGE).orElse(Constants.DEFAULT_PAGE_PAGINATION));
         int size = Integer.parseInt(request.queryParam(Constants.QUERY_PARAM_SIZE).orElse(Constants.DEFAULT_SIZE_PAGINATION));
-
         return technologyServicePort.findPaginatedCapabilitiesByTechnologies(OrderList.fromString(order), page, size)
             .doOnSuccess( pageCapabilities -> log.info(Constants.ASSIGN_TECHNOLOGIES_CREATED_RS_OK))
             .flatMap(pageCapabilities ->
@@ -129,6 +129,31 @@ public class TechnologyHandlerImpl {
                         HttpStatus.INTERNAL_SERVER_ERROR,
                         TechnicalMessage.INTERNAL_ERROR);
             });
+    }
+
+    public Mono<ServerResponse> deleteTechnologiesByCapabilitiesIds(ServerRequest request) {
+        String capabilitiesParam = request.queryParam(Constants.QUERY_PARAM_CAPABILITIES_IDS).orElse("");
+        List<Long> capabilitiesIds = Arrays.stream(capabilitiesParam.split(","))
+            .map(Long::parseLong)
+            .toList();
+        return technologyServicePort.deleteTechnologiesByCapabilitiesIds(capabilitiesIds)
+                .doOnSuccess(empty -> log.info(Constants.TECHNOLOGIES_BY_CAPABILITIES_DELETE_RS_OK))
+                .flatMap(empty -> ServerResponse
+                        .status(HttpStatus.OK)
+                        .bodyValue(new ResponseDTO(TechnicalMessage.TECHNOLOGIES_DELETE_BY_CAPABILITIES_OK.getMessage())))
+                .doOnError(ex -> log.error(Constants.TECHNOLOGY_ERROR, ex))
+                .onErrorResume(BusinessException.class, ex -> buildErrorResponse(
+                        HttpStatus.CONFLICT,
+                        ex.getTechnicalMessage()))
+                .onErrorResume(TechnicalException.class, ex -> buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ex.getTechnicalMessage()))
+                .onErrorResume(ex -> {
+                    log.error(Constants.UNEXPECTED_ERROR, ex);
+                    return buildErrorResponse(
+                            HttpStatus.INTERNAL_SERVER_ERROR,
+                            TechnicalMessage.INTERNAL_ERROR);
+                });
     }
 
     private Mono<ServerResponse> buildErrorResponse(HttpStatus httpStatus, TechnicalMessage error) {

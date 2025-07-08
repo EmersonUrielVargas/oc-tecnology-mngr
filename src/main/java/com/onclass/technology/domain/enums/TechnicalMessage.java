@@ -17,6 +17,7 @@ public enum TechnicalMessage {
     UNSUPPORTED_OPERATION("501", "Method not supported, please try again", ""),
     TECHNOLOGY_CREATED("201", "Technology created successful", ""),
     TECHNOLOGIES_ASSIGN_OK("200", "Technologies assigned successful", ""),
+    TECHNOLOGIES_DELETE_BY_CAPABILITIES_OK("200", "Technologies by capabilities ids are deleted successfully", ""),
     TECHNOLOGY_ALREADY_EXISTS("400","The technology already exist." ,"" ),
     ERROR_CREATING_TECHNOLOGY("500","An error occurred qhile creating the technology" ,"" ),
     SOME_TECHNOLOGIES_NOT_FOUND("404","Some of the technologies were not found, please verify data" ,"" );

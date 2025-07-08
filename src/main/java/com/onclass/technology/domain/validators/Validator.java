@@ -2,6 +2,7 @@ package com.onclass.technology.domain.validators;
 
 import com.onclass.technology.domain.constants.Constants;
 import com.onclass.technology.domain.enums.TechnicalMessage;
+import com.onclass.technology.domain.exceptions.BusinessException;
 import com.onclass.technology.domain.exceptions.InvalidFormatParamException;
 import com.onclass.technology.domain.exceptions.ParamRequiredMissingException;
 import com.onclass.technology.domain.model.Technology;
@@ -22,6 +23,13 @@ public class Validator {
             return Mono.error(new InvalidFormatParamException(TechnicalMessage.TECHNOLOGY_DESCRIPTION_TOO_LONG));
         }
         return Mono.just(technology);
+    }
+
+    public static Mono<Void> validationCondition(boolean condition, BusinessException exception) {
+        if (!condition) {
+            return Mono.error(exception);
+        }
+        return Mono.empty();
     }
 
 	public static <T> boolean isNullOrEmpty(T value){

@@ -19,6 +19,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static com.onclass.technology.infrastructure.entrypoints.util.Constants.*;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.DELETE;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
@@ -85,6 +87,9 @@ public class RouterRest {
      })
     public RouterFunction<ServerResponse> routerFunction(TechnologyHandlerImpl technologyHandler) {
         return route(POST(PATH_POST_TECHNOLOGY), technologyHandler::createTechnology)
-            .andRoute(POST(PATH_POST_ASSIGN_TECHNOLOGIES), technologyHandler::assignTechnologies);
+            .andRoute(POST(PATH_POST_ASSIGN_TECHNOLOGIES), technologyHandler::assignTechnologies)
+            .andRoute(GET(PATH_GET_TECHNOLOGIES_BY_CAPABILITIES_IDS),technologyHandler::getTechnologiesByCapabilities)
+            .andRoute(GET(PATH_GET_CAPABILITIES_SORT_BY_TECHNOLOGIES),technologyHandler::getCapabilitiesSortByTechnologies)
+            .andRoute(DELETE(PATH_DELETE_TECHNOLOGIES_BY_CAPABILITIES),technologyHandler::deleteTechnologiesByCapabilitiesIds);
     }
 }
